@@ -37,7 +37,7 @@ export class PostResolvers {
     if (!post) {
       return null;
     }
-    if (typeof title !== 'undefind') {
+    if (typeof title !== 'undefined') {
       post.title = title;
       await em.persistAndFlush(post);
     }
