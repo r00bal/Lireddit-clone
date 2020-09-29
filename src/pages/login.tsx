@@ -15,24 +15,10 @@ import { useMutation } from 'urql';
 import { useLoginMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router';
+import { withUrqlClient } from 'next-urql';
+import { createUrqlClient } from '../utils/createUrqlClient';
 
 interface registerProps {}
-
-const REGISTER_MUTATION = `
-mutation Register($username: String!, $password: String!){
- register(options: {username: $username, password: $password}) {
-  errors {
-   field
-   message
- }
-   user {
-     id
-     username
-    
-   }
- }
-}
-`;
 
 const Login: React.FC<registerProps> = ({}) => {
   const router = useRouter();
@@ -40,9 +26,9 @@ const Login: React.FC<registerProps> = ({}) => {
   return (
     <Wrapper variant='small'>
       <Formik
-        initialValues={{ username: '', password: '' }}
+        initialValues={{ usernameOrEmail: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
-          const response = await login({ options: values });
+          const response = await login(values);
 
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data.login.errors));
@@ -54,9 +40,9 @@ const Login: React.FC<registerProps> = ({}) => {
         {({ isSubmitting }) => (
           <Form>
             <InputField
-              name='username'
-              placeholder='username'
-              label='Username'
+              name='usernameOrEmail'
+              placeholder='username or email'
+              label='Username or Email'
             />
             <Box mt={4}>
               <InputField
@@ -80,4 +66,4 @@ const Login: React.FC<registerProps> = ({}) => {
   );
 };
 
-export default Login;
+export default withUrqlClient(createUrqlClient)(Login);
