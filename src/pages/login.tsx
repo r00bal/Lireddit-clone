@@ -8,6 +8,8 @@ import {
   Input,
   Box,
   Button,
+  Link,
+  Flex,
 } from '@chakra-ui/core';
 import { Wrapper } from '../components/Wrapper';
 import { InputField } from '../components/InputField';
@@ -17,6 +19,7 @@ import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router';
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from '../utils/createUrqlClient';
+import NextLink from 'next/link';
 
 interface registerProps {}
 
@@ -52,13 +55,21 @@ const Login: React.FC<registerProps> = ({}) => {
                 type='password'
               />
             </Box>
-            <Button
+            <Flex
+              align='flex-start'
+              justify='space-between'
               mt={4}
-              type='submit'
-              isLoading={isSubmitting}
-              variantColor='teal'>
-              login
-            </Button>
+              flexDirection='row'>
+              <Button
+                type='submit'
+                isLoading={isSubmitting}
+                variantColor='teal'>
+                login
+              </Button>
+              <NextLink href='/forgot-password'>
+                <Link>forgot password?</Link>
+              </NextLink>
+            </Flex>
           </Form>
         )}
       </Formik>
