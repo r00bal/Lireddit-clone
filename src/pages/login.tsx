@@ -25,6 +25,7 @@ interface registerProps {}
 
 const Login: React.FC<registerProps> = ({}) => {
   const router = useRouter();
+
   const [, login] = useLoginMutation();
   return (
     <Wrapper variant='small'>
@@ -37,7 +38,12 @@ const Login: React.FC<registerProps> = ({}) => {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
             // worked
-            router.push('/');
+
+            if (typeof router.query.next === 'string') {
+              router.push(router.query.next);
+            } else {
+              router.push('/');
+            }
           }
         }}>
         {({ isSubmitting }) => (
