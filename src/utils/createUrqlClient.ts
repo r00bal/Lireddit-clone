@@ -36,10 +36,8 @@ const errorExchange: Exchange = ({ forward }) => (ops$) => {
 export const cursorPagination = (): Resolver => {
   return (_parent, fieldArgs, cache, info) => {
     const { parentKey: entityKey, fieldName } = info;
-    console.log('entityKey ', entityKey);
 
     const allFields = cache.inspectFields(entityKey);
-    console.log('allFields :', allFields);
 
     const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
     const size = fieldInfos.length;
@@ -48,21 +46,30 @@ export const cursorPagination = (): Resolver => {
     }
     console.log('fieldArgs :', fieldArgs);
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
-    console.log('key we created: ', fieldKey);
-    const isItInTheCache = cache.resolveFieldByKey(entityKey, fieldKey);
-    console.log('isItInTheCache ', isItInTheCache);
+    const isItInTheCache = cache.resolve(
+      cache.resolveFieldByKey(entityKey, fieldKey) as string,
+      'posts'
+    );
 
     info.partial = !isItInTheCache;
+    let hasMore = true;
     const results: string[] = [];
     fieldInfos.forEach((fi) => {
-      console.log('fi :', fi);
-
-      const data = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string[];
-      console.log('data :', data);
+      const key = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string;
+      const data = cache.resolve(key, 'posts') as string[];
+      const _hasMore = cache.resolve(key, 'hasMore');
+      if (!_hasMore) {
+        hasMore = _hasMore as boolean;
+      }
+      console.log('data :', data, hasMore);
       results.push(...data);
     });
     console.log('results :', results);
-    return results;
+    return {
+      __typename: 'PaginatedPosts',
+      hasMore,
+      posts: results,
+    };
     // const visited = new Set();
     // let result: NullArray<string> = [];
     // let prevOffset: number | null = null;
@@ -125,6 +132,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
       resolvers: {
         Query: {
           posts: cursorPagination(),
