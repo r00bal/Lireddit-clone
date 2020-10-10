@@ -10,6 +10,7 @@ import {
   UseMiddleware,
   FieldResolver,
   Root,
+  ObjectType,
 } from 'type-graphql';
 import { Post } from '../entities/Post';
 import { MyContext } from '../types';
@@ -24,6 +25,14 @@ class PostInput {
   text: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver(Post)
 export class PostResolvers {
   @FieldResolver(() => String)
@@ -31,22 +40,61 @@ export class PostResolvers {
     return root.text.slice(0, 100);
   }
 
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: string | null
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
+    // 20 -> 21
     const realLimit = Math.min(50, limit);
-    const gb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder('p')
-      .orderBy('"createdAt"', 'DESC')
-      .take(realLimit);
+    const realLimitPlusOne = realLimit + 1;
+
+    const replacments: any[] = [realLimitPlusOne];
 
     if (cursor) {
-      gb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      replacments.push(new Date(parseInt(cursor)));
     }
-    return gb.getMany();
+
+    const posts = await getConnection().query(
+      `
+    select p.*,
+    json_build_object(
+      'id', u.id,
+      'username', u.username,
+      'email', u.email,
+      'createdAt', u."createdAt",
+      'updatedAt', u."updatedAt"
+      ) creator
+    from post p
+    inner join public.user u on u.id = p."creatorId"
+    ${cursor ? `where p."createdAt" < $2` : ''}
+    order by p."createdAt" DESC
+    limit $1
+    `,
+      replacments
+    );
+
+    // const gb = getConnection()
+    //   .getRepository(Post)
+    //   .createQueryBuilder('p')
+    //   .innerJoinAndSelect('p.creator', 'u', 'u.id = p."creatorId"')
+    //   .orderBy('p."createdAt"', 'DESC')
+    //   .take(realLimitPlusOne);
+
+    // if (cursor) {
+    //   gb.where('p."createdAt" < :cursor', {
+    //     cursor: new Date(parseInt(cursor)),
+    //   });
+    // }
+
+    // const posts = await gb.getMany();
+
+    console.log('posts ', posts);
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 
   @Query(() => Post, { nullable: true })
