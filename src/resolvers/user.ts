@@ -8,7 +8,6 @@ import {
   ObjectType,
   FieldResolver,
   Root,
-  UseMiddleware,
 } from 'type-graphql';
 import { MyContext } from '../types';
 import { User } from '../entities/User';
@@ -47,6 +46,11 @@ export class UserResolver {
     }
     // current user want to see someone elses email
     return '';
+  }
+
+  @Query(() => [User])
+  async users(): Promise<User[]> {
+    return User.find();
   }
 
   @Mutation(() => UserResponse)

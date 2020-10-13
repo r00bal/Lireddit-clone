@@ -16,6 +16,8 @@ import { createConnection } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
 import path from 'path';
+import { Updoot } from './entities/Updoot';
+import { UpdootResolver } from './resolvers/updoot';
 // rerun 3
 const main = async () => {
   const conn = await createConnection({
@@ -26,7 +28,7 @@ const main = async () => {
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
   });
 
   await conn.runMigrations();
@@ -64,7 +66,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolvers, UserResolver],
+      resolvers: [HelloResolver, PostResolvers, UserResolver, UpdootResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({ req, res, redis }),
