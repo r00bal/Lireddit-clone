@@ -1,22 +1,12 @@
-import { Navbar } from '../components/Navbar';
+import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/core';
 import { withUrqlClient } from 'next-urql';
-import { createUrqlClient } from '../utils/createUrqlClient';
-import { usePostsQuery } from '../generated/graphql';
-import { Layout } from '../components/Layout';
-import {
-  Link,
-  Stack,
-  Box,
-  Heading,
-  Text,
-  Flex,
-  Button,
-  Icon,
-  IconButton,
-} from '@chakra-ui/core';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { EditDeletePostaButtoms } from '../components/editDeletePostaButtoms';
+import { Layout } from '../components/Layout';
 import { UpdootSection } from '../components/UpdootSection';
+import { usePostsQuery } from '../generated/graphql';
+import { createUrqlClient } from '../utils/createUrqlClient';
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -27,31 +17,40 @@ const Index = () => {
   if (!fetching && !data) {
     return <div> you got no posts for some reason</div>;
   }
+
   return (
     <Layout>
-      <Flex align='center'>
-        <Heading>LiReddit</Heading>
-        <NextLink href='create-post'>
-          <Link ml='auto'>create post</Link>
-        </NextLink>
-      </Flex>
-
-      <br />
       {fetching && !data ? (
         <div>Loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts.map((p) => (
-            <Flex key={p.id} p={5} shadow='md' borderWidth='1px'>
-              <UpdootSection post={p} />
+          {data!.posts.posts.map((p) =>
+            !p ? null : (
+              <Flex key={p.id} p={5} shadow='md' borderWidth='1px'>
+                <UpdootSection post={p} />
 
-              <Box>
-                <Heading fontSize='xl'>{p.title}</Heading>
-                <Text>posted by {p.creator.username}</Text>
-                <Text mt={4}>{p.textSnippet + `...`}</Text>
-              </Box>
-            </Flex>
-          ))}
+                <Box flex={1}>
+                  <NextLink href='/post/[id]' as={`/post/${p.id}`}>
+                    <Link>
+                      <Heading fontSize='xl'>{p.title}</Heading>
+                    </Link>
+                  </NextLink>
+                  <Text>posted by {p.creator.username}</Text>
+                  <Flex>
+                    <Text flex={1} mt={4}>
+                      {p.textSnippet + `...`}
+                    </Text>
+                    <Box ml='auto'>
+                      <EditDeletePostaButtoms
+                        id={p.id}
+                        creatorId={p.creator.id}
+                      />
+                    </Box>
+                  </Flex>
+                </Box>
+              </Flex>
+            )
+          )}
         </Stack>
       )}
       {data && data.posts.hasMore ? (
