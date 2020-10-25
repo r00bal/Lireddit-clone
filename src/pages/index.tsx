@@ -2,7 +2,7 @@ import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/core';
 import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import { useState } from 'react';
-import { EditDeletePostaButtoms } from '../components/editDeletePostaButtoms';
+import { EditDeletePostaButtoms } from '../components/EditDeletePostaButtoms';
 import { Layout } from '../components/Layout';
 import { UpdootSection } from '../components/UpdootSection';
 import { usePostsQuery } from '../generated/graphql';

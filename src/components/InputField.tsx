@@ -6,8 +6,6 @@ import {
   FormErrorMessage,
   Textarea,
 } from '@chakra-ui/core';
-import { withUrqlClient } from 'next-urql';
-import { createUrqlClient } from '../utils/createUrqlClient';
 import { useField } from 'formik';
 
 type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -40,5 +38,3 @@ export const InputField: React.FC<InputFieldProps> = ({
     </FormControl>
   );
 };
-
-export default withUrqlClient(createUrqlClient)(InputField);

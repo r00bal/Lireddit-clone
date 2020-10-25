@@ -4,7 +4,7 @@ import { createUrqlClient } from '../../utils/createUrqlClient';
 import { Layout } from '../../components/Layout';
 import { Heading, Box } from '@chakra-ui/core';
 import { useGetPostFromUrl } from '../../utils/useGetPostFromUrl';
-import { EditDeletePostaButtoms } from '../../components/editDeletePostaButtoms';
+import { EditDeletePostaButtoms } from '../../components/EditDeletePostaButtoms';
 
 const Post = ({}) => {
   const [{ data, error, fetching }] = useGetPostFromUrl();
